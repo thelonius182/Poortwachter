@@ -31,8 +31,18 @@ Netwerk:
 Besturingssysteem:
 
 ```text
-Windows 10
+Windows 10 Pro N
+versie 22H2
+build 19045
 ```
+
+De Nipper-pc kan niet naar Windows 11 worden geüpgraded.
+
+Stichting Concertzender gebruikt Extended Security Updates (ESU) voor Windows 10. De ESU-einddata zijn:
+
+- jaar 1: 13 oktober 2026;
+- jaar 2: 12 oktober 2027;
+- jaar 3: 10 oktober 2028.
 
 Op de Nipper-pc draaien de volgende remote-tools machinebreed als `LocalSystem`-service:
 
