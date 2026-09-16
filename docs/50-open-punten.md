@@ -1,7 +1,6 @@
 # Open punten
 
 - Dekt een bestaand certificaat `nippersessie.concertzender.nl`?
-- Welke .NET-versie gebruiken we?
 - WinForms of WPF voor `NipperSessie.exe`?
 - Hoe communiceren `NipperSessie.exe` en `NipperSessieService` lokaal?
 - Waar en in welk formaat bewaart `NipperSessieService` de persistente sessietoestand?
