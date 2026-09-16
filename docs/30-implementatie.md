@@ -27,9 +27,9 @@ NipperSessie.Contracts    netstandard2.0
 
 ## Randvoorwaarde
 
-Implementatiekeuzes vermijden substantiële investeringen die uitsluitend nodig zijn voor de huidige Windows 10-pc.
+Maak implementaties zoveel mogelijk herbruikbaar als de huidige Nipper-pc (Win-10) vervangen wordt door een Windows-11 machine.
 
-Waar mogelijk worden onderdelen zo gebouwd dat ze ook op de opvolger van de Nipper-pc bruikbaar blijven.
+Maak implementaties zo eenvoudig mogelijk, zeker als ze specifiek zijn voor de huidige Win-10 versie van de Nipper-pc.
 
 ## Communicatie
 
