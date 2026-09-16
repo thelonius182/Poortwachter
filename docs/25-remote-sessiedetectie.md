@@ -67,12 +67,18 @@ Splashtop valt buiten de toegangsregeling en toestandsmachine van NipperSessie.
 
 ## Prototype
 
-De gecombineerde PowerShell-watcher staat op de Nipper-pc als:
+De gecombineerde PowerShell-watcher staat in deze repository als:
+
+```text
+prototype/remote_session_watch.ps1
+```
+
+De geteste kopie op de Nipper-pc staat als:
 
 ```text
 C:\Users\Gebruiker\Documents\WindowsPowerShell\Scripts\remote_session_watch.ps1
 ```
 
-De watcher combineert de drie bovenstaande detectors. De daarin aanwezige oude claim- en toestandslogica is achterhaald en is geen onderdeel van het huidige ontwerp.
+De repository bevat bewust de oorspronkelijke prototypeversie. De watcher combineert de drie bovenstaande detectors. De daarin aanwezige oude claim- en toestandslogica is achterhaald en is geen onderdeel van het huidige ontwerp.
 
 De detectieproeven kunnen bij de implementatie worden gebruikt voor diagnose en, voor AnyDesk en TeamViewer, voor het vaststellen of verbindingen tijdens `AFSLUITEN` zijn beëindigd.
