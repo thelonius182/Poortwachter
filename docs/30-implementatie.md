@@ -14,6 +14,12 @@
 - `NipperSessieService` draait op de Nipper-pc
 - `NipperSessie.exe` draait lokaal op de Nipper-pc
 
+## Randvoorwaarde
+
+Implementatiekeuzes vermijden substantiële investeringen die uitsluitend nodig zijn voor de huidige Windows 10-pc.
+
+Waar mogelijk worden onderdelen zo gebouwd dat ze ook op de opvolger van de Nipper-pc bruikbaar blijven.
+
 ## Communicatie
 
 De webapp en `NipperSessieService` communiceren via WSS volgens `10-ontwerp.md`.
