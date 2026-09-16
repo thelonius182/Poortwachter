@@ -17,6 +17,19 @@ C# / .NET voor alle onderdelen:
 - ASP.NET Core kan als container op de Synology draaien;
 - gedeelde .NET-types voor het communicatiecontract.
 
+## 2026-09-16 — .NET-targets
+
+**Besluit**
+
+- `NipperSessie.Web`: .NET 10 (`net10.0`)
+- `NipperSessieService`: .NET Framework 4.8 (`net48`)
+- `NipperSessie.exe`: .NET Framework 4.8 (`net48`)
+- `NipperSessie.Contracts`: .NET Standard 2.0 (`netstandard2.0`)
+
+**Reden**
+
+De huidige Nipper-pc draait Windows 10 Pro N 22H2 en kan niet naar Windows 11 worden geüpgraded. De Windows-onderdelen blijven daarom op .NET Framework 4.8. De webapp draait op de Synology en kan .NET 10 gebruiken. `netstandard2.0` maakt gedeelde contracttypes bruikbaar vanuit beide runtimes.
+
 ## 2026-09-16 — Deployment webapp
 
 **Besluit**
