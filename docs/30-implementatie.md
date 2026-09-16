@@ -27,9 +27,9 @@ NipperSessie.Contracts    netstandard2.0
 
 ## Randvoorwaarde
 
-Maak implementaties zoveel mogelijk herbruikbaar als de huidige Nipper-pc (Win-10) vervangen wordt door een Windows-11 machine.
+Maak implementaties zoveel mogelijk herbruikbaar als de huidige Nipper-pc vervangen wordt door een Windows 11-pc.
 
-Maak implementaties zo eenvoudig mogelijk, zeker als ze specifiek zijn voor de huidige Win-10 versie van de Nipper-pc.
+Houd implementaties zo eenvoudig mogelijk, vooral wanneer ze specifiek nodig zijn voor de huidige Windows 10-pc.
 
 ## Communicatie
 
