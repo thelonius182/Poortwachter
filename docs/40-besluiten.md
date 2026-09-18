@@ -61,3 +61,15 @@ Voor uitrol moet `nippersessie.concertzender.nl` in DNS naar het publieke adres 
 **Reden**
 
 Poort 80 en 443 worden al vanaf de Ziggo-router naar de Synology doorgestuurd. Daardoor kan DSM een Let's Encrypt-certificaat voor deze hostname aanvragen en vernieuwen.
+
+## 2026-09-18 — Lokale IPC
+
+**Besluit**
+
+`NipperSessie.exe` en `NipperSessieService` communiceren lokaal via `System.IO.Pipes`, zonder WCF.
+
+`NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client.
+
+**Reden**
+
+De communicatie betreft twee processen op dezelfde Windows-pc en heeft een klein protocol nodig voor de lokale melding en verlengen. Directe named-pipe-IPC lost dit op zonder extra broker, netwerkservice of WCF-laag. Dit sluit aan bij de projectcriteria proportionaliteit en subsidiariteit.
