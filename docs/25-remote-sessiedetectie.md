@@ -56,14 +56,16 @@ Er is geen bruikbaar sessielog gevonden. De prototype-detectie gebruikt `SRApp.e
 
 ```text
 SRApp.exe count > 0                         → verbinding actief
-SRApp.exe count = 0 gedurende minimaal 5 s → verbinding beëindigd
+SRApp.exe count = 0 gedurende minimaal 5 s → remote verbinding verbroken
 ```
 
 De vijf seconden zijn debounce omdat de `SRApp.exe`-processen na elkaar verdwijnen.
 
 Getest bij normaal verbreken en abrupt afsluiten van de Splashtop-client. Dit is geobserveerd procesgedrag, geen gedocumenteerde sessie-API.
 
-Splashtop-verbindingen worden voor de claimlogica op dezelfde manier behandeld als verbindingen via AnyDesk en TeamViewer. Alleen de technische detectiemethode verschilt.
+Bij een actieve claim worden Splashtop-verbindingen voor de claimlogica op dezelfde manier behandeld als verbindingen via AnyDesk en TeamViewer. Alleen de technische detectiemethode verschilt.
+
+Als er geen actieve claim is, bepaalt een actieve Splashtop-verbinding alleen de pc-toestand: `IN_GEBRUIK` zolang de verbinding actief is en `VRIJ` nadat de verbinding gedurende minimaal 5 seconden is verdwenen. De Splashtop-streamer/service zelf blijft actief.
 
 ## Prototype
 

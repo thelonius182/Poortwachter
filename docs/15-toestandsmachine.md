@@ -12,7 +12,7 @@ AFSLUITEN
 
 ## VRIJ
 
-Er is geen actieve claim. AnyDesk en TeamViewer zijn niet beschikbaar.
+Er is geen actieve claim, er is geen actieve Splashtop-verbinding zonder claim, en AnyDesk en TeamViewer zijn niet beschikbaar.
 
 ### CREATE_CLAIM
 
@@ -36,7 +36,11 @@ Wijzigingen aan de pc-toestand en claim worden één voor één verwerkt.
 
 ## IN_GEBRUIK
 
-Er is één actieve claim. Vastgelegd zijn:
+`IN_GEBRUIK` kan twee vormen hebben.
+
+### Met actieve claim
+
+Vastgelegd zijn:
 
 ```text
 owner
@@ -65,6 +69,21 @@ Als de remote verbinding wordt verbroken:
 IN_GEBRUIK
 → AFSLUITEN
 ```
+
+### In gebruik zonder claim
+
+Als een Splashtop-verbinding tot stand komt terwijl de pc `VRIJ` is, wordt geen claim aangemaakt maar gaat de pc wel naar `IN_GEBRUIK`.
+
+Zolang deze Splashtop-verbinding actief is, wordt `CREATE_CLAIM` geweigerd.
+
+Als de gebruiker de Splashtop-verbinding verbreekt en de detectie na minimaal 5 seconden bevestigt dat er geen verbinding meer actief is:
+
+```text
+IN_GEBRUIK
+→ VRIJ
+```
+
+De Splashtop-streamer/service blijft hierbij actief en beschikbaar. Er is geen overgang via `AFSLUITEN`, omdat er geen claim is en AnyDesk en TeamViewer al niet beschikbaar zijn.
 
 ### Verlengen
 
@@ -105,11 +124,18 @@ Een nieuwe claim kan niet worden aangemaakt.
 4. maakt TeamViewer niet beschikbaar;
 5. laat Splashtop ongemoeid.
 
-Als AnyDesk en TeamViewer beide zijn afgesloten en niet beschikbaar zijn:
+Als AnyDesk en TeamViewer beide zijn afgesloten en niet beschikbaar zijn en er geen actieve Splashtop-verbinding zonder claim is:
 
 ```text
 AFSLUITEN
 → VRIJ
+```
+
+Als er op dat moment wel een actieve Splashtop-verbinding zonder claim is:
+
+```text
+AFSLUITEN
+→ IN_GEBRUIK
 ```
 
 Als dat niet lukt, blijft de toestand `AFSLUITEN`. De service blijft proberen de vereiste eindtoestand te bereiken.
@@ -177,7 +203,7 @@ IN_GEBRUIK
       VRIJ
 ```
 
-Remote verbindingen via AnyDesk, TeamViewer en Splashtop worden door `PoortwachterService` gedetecteerd en beïnvloeden de claim zoals hierboven beschreven.
+Remote verbindingen via AnyDesk, TeamViewer en Splashtop worden door `PoortwachterService` gedetecteerd. Verbindingen die bij een actieve claim horen beïnvloeden de claim zoals hierboven beschreven. Een Splashtop-verbinding zonder actieve claim bepaalt alleen de pc-toestand.
 
 ## Persistente toestand
 
