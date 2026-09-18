@@ -38,7 +38,7 @@ Een remote verbinding via AnyDesk, TeamViewer of Splashtop maakt geen claim aan 
 
 Een claim duurt standaard één uur.
 
-De looptijd van de claim wordt bepaald door `NipperSessieService`. De claim ontstaat bij een geslaagde `CREATE_CLAIM`; een remote verbinding hoeft daarvoor niet tot stand te zijn gekomen.
+De looptijd van de claim wordt bepaald door `PoortwachterService`. De claim ontstaat bij een geslaagde `CREATE_CLAIM`; een remote verbinding hoeft daarvoor niet tot stand te zijn gekomen.
 
 Een verbroken of opnieuw gemaakte remote verbinding verandert de looptijd van de claim niet.
 
@@ -91,7 +91,7 @@ Jan Jansen is geen lid van de nipper-groep
 Voorkeursadres:
 
 ```text
-https://nippersessie.concertzender.nl
+https://poortwachter.concertzender.nl
 
 ```
 
@@ -101,7 +101,7 @@ De webapp:
 
 - verzorgt de medewerker-UI;
 - verzorgt Google Workspace-authenticatie en groepscontrole;
-- stuurt opdrachten naar `NipperSessieService`;
+- stuurt opdrachten naar `PoortwachterService`;
 - toont de door de service gemelde toestand;
 - mag de laatst ontvangen toestand bewaren;
 - beslist niet zelfstandig over de pc-toestand of claim.
@@ -110,7 +110,7 @@ De webapp:
 
 ## 6. Autoriteit
 
-`NipperSessieService` op de Nipper-pc is de enige autoriteit over:
+`PoortwachterService` op de Nipper-pc is de enige autoriteit over:
 
 - pc-toestand;
 - actieve claim;
@@ -149,7 +149,7 @@ Hoe een Splashtop-verbinding precies doorwerkt in de pc-toestand en claimlogica 
 
 ### AnyDesk en TeamViewer
 
-Bij `CREATE_CLAIM` maakt `NipperSessieService` AnyDesk en TeamViewer beschikbaar.
+Bij `CREATE_CLAIM` maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar.
 
 De claim wordt alleen aangemaakt als beide beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en wordt de claim niet aangemaakt.
 
@@ -197,9 +197,9 @@ Tien minuten voor het nieuwe eindtijdstip verschijnt dezelfde melding opnieuw.
 
 Er is geen maximumaantal verlengingen.
 
-Verlengen gebeurt lokaal tussen `NipperSessie.exe` en `NipperSessieService`; het is geen opdracht vanuit de webapp.
+Verlengen gebeurt lokaal tussen `Poortwachter.exe` en `PoortwachterService`; het is geen opdracht vanuit de webapp.
 
-De lokale communicatie gebruikt `System.IO.Pipes`. `NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client. Het lokale protocol blijft beperkt tot de gegevens en acties die nodig zijn voor de 10-minutenmelding en verlengen.
+De lokale communicatie gebruikt `System.IO.Pipes`. `PoortwachterService` is de named-pipe-server en `Poortwachter.exe` is client. Het lokale protocol blijft beperkt tot de gegevens en acties die nodig zijn voor de 10-minutenmelding en verlengen.
 
 ---
 
@@ -207,7 +207,7 @@ De lokale communicatie gebruikt `System.IO.Pipes`. `NipperSessieService` is de n
 
 Een herstart verandert eigenaar en eindtijd van een lopende claim niet.
 
-De claim en pc-toestand worden lokaal persistent opgeslagen. `NipperSessieService` herstelt na een herstart de juiste toestand en beschikbaarheid van AnyDesk en TeamViewer. De herstelregels staan in `15-toestandsmachine.md`.
+De claim en pc-toestand worden lokaal persistent opgeslagen. `PoortwachterService` herstelt na een herstart de juiste toestand en beschikbaarheid van AnyDesk en TeamViewer. De herstelregels staan in `15-toestandsmachine.md`.
 
 ---
 
@@ -234,7 +234,7 @@ Probeer het later opnieuw.
 
 Er zijn dan geen Start- of Stop-knoppen.
 
-Na herstel stuurt `NipperSessieService` zijn volledige actuele toestand opnieuw.
+Na herstel stuurt `PoortwachterService` zijn volledige actuele toestand opnieuw.
 
 ---
 
@@ -334,7 +334,7 @@ De precieze formulering van medewerkersteksten kan later nog worden aangescherpt
 
 Een open webpagina wordt automatisch bijgewerkt.
 
-De resterende tijd kan in de browser aftellen, maar de door `NipperSessieService` gemelde `expires_at` blijft bepalend.
+De resterende tijd kan in de browser aftellen, maar de door `PoortwachterService` gemelde `expires_at` blijft bepalend.
 
 Bij verlenging wordt de nieuwe eindtijd automatisch in de UI verwerkt.
 
@@ -342,10 +342,10 @@ Bij verlenging wordt de nieuwe eindtijd automatisch in de UI verwerkt.
 
 ## 13. Communicatie webapp ↔ service
 
-`NipperSessieService` onderhoudt zelf een permanente beveiligde WebSocket-verbinding met de webapp:
+`PoortwachterService` onderhoudt zelf een permanente beveiligde WebSocket-verbinding met de webapp:
 
 ```text
-NipperSessieService
+PoortwachterService
         │
         │ WSS
         ▼
@@ -353,7 +353,7 @@ Synology :443
 DSM Reverse Proxy
         │
         ▼
-NipperSessie-webapp
+Poortwachter-webapp
 
 ```
 
@@ -476,7 +476,7 @@ De webapp vervangt zijn vorige status door het complete nieuwe statusbericht.
 
 ## 17. Gelijktijdige opdrachten
 
-Wijzigingen aan de pc-toestand en claim worden door `NipperSessieService` één voor één verwerkt.
+Wijzigingen aan de pc-toestand en claim worden door `PoortwachterService` één voor één verwerkt.
 
 Bij twee vrijwel gelijktijdige `CREATE_CLAIM`-opdrachten kan daarom maar één opdracht slagen.
 
@@ -488,7 +488,7 @@ Er is geen wachtrij voor medewerkers.
 
 ## 18. Verbinding en heartbeat
 
-`NipperSessieService` bouwt de WebSocket-verbinding zelf op.
+`PoortwachterService` bouwt de WebSocket-verbinding zelf op.
 
 Bij iedere nieuwe verbinding stuurt de service onmiddellijk een volledige `STATUS`.
 
@@ -507,7 +507,7 @@ Heartbeats zijn geen onderdeel van de pc-toestand of claim en hoeven niet afzond
 
 De WebSocket gebruikt TLS.
 
-Daarnaast authenticeert `NipperSessieService` zich met een afzonderlijk willekeurig service-secret.
+Daarnaast authenticeert `PoortwachterService` zich met een afzonderlijk willekeurig service-secret.
 
 Dit secret:
 
@@ -520,7 +520,7 @@ Dit secret:
 
 ## 20. Logging
 
-### `NipperSessieService`
+### `PoortwachterService`
 
 De lokale logging bevat ten minste:
 
@@ -546,7 +546,7 @@ De webapp logt ten minste:
 - controle van lidmaatschap van de `nipper-groep`;
 - verzonden `CREATE_CLAIM` en `RELEASE_CLAIM`;
 - ontvangen opdrachtresultaten;
-- verbinden/verbreken van `NipperSessieService`;
+- verbinden/verbreken van `PoortwachterService`;
 - relevante communicatiefouten.
 
 De webapp houdt geen eigen claimgeschiedenis bij om daarmee de toestand te reconstrueren.
@@ -582,14 +582,14 @@ Synology-webapp
     doorgeven van opdrachten
     tonen van actuele status
 
-NipperSessieService
+PoortwachterService
     autoriteit over pc-toestand en claim
     claimtijd
     lokale persistentie
     AnyDesk en TeamViewer
     communicatie met webapp
 
-NipperSessie.exe
+Poortwachter.exe
     lokale 10-minutenmelding
     verzoek tot verlengen
 

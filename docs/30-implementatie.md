@@ -4,28 +4,28 @@
 
 - C# / .NET
 - ASP.NET Core voor de webapp
-- .NET Windows Service voor `NipperSessieService`
-- WinForms voor `NipperSessie.exe`
+- .NET Windows Service voor `PoortwachterService`
+- WinForms voor `Poortwachter.exe`
 
 Target frameworks:
 
 ```text
-NipperSessie.Web          net10.0
-NipperSessieService       net48
-NipperSessie.exe          net48
-NipperSessie.Contracts    netstandard2.0
+Poortwachter.Web          net10.0
+PoortwachterService       net48
+Poortwachter.exe          net48
+Poortwachter.Contracts    netstandard2.0
 ```
 
-`NipperSessie.exe` wordt geïmplementeerd als WinForms-applicatie op .NET Framework 4.8. De applicatie verzorgt alleen de lokale 10-minutenmelding en het verzoek tot verlengen. Claimlogica blijft in `NipperSessieService`.
+`Poortwachter.exe` wordt geïmplementeerd als WinForms-applicatie op .NET Framework 4.8. De applicatie verzorgt alleen de lokale 10-minutenmelding en het verzoek tot verlengen. Claimlogica blijft in `PoortwachterService`.
 
-`NipperSessie.Contracts` bevat gedeelde types voor het communicatiecontract en moet bruikbaar zijn vanuit zowel .NET Framework 4.8 als .NET 10.
+`Poortwachter.Contracts` bevat gedeelde types voor het communicatiecontract en moet bruikbaar zijn vanuit zowel .NET Framework 4.8 als .NET 10.
 
 ## Deployment
 
 - webapp als container via Synology Container Manager
 - publicatie via DSM Reverse Proxy
-- `NipperSessieService` draait op de Nipper-pc
-- `NipperSessie.exe` draait lokaal op de Nipper-pc
+- `PoortwachterService` draait op de Nipper-pc
+- `Poortwachter.exe` draait lokaal op de Nipper-pc
 
 ## Randvoorwaarde
 
@@ -35,18 +35,18 @@ Houd implementaties zo eenvoudig mogelijk, vooral wanneer ze specifiek nodig zij
 
 ## Communicatie
 
-De webapp en `NipperSessieService` communiceren via WSS volgens `10-ontwerp.md`.
+De webapp en `PoortwachterService` communiceren via WSS volgens `10-ontwerp.md`.
 
-`NipperSessie.exe` en `NipperSessieService` communiceren lokaal via `System.IO.Pipes`, zonder WCF. `NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client.
+`Poortwachter.exe` en `PoortwachterService` communiceren lokaal via `System.IO.Pipes`, zonder WCF. `PoortwachterService` is de named-pipe-server en `Poortwachter.exe` is client.
 
 Gedeelde .NET-types worden gebruikt voor het communicatiecontract.
 
 ## Persistente toestand
 
-`NipperSessieService` bewaart de persistente toestand als JSON in:
+`PoortwachterService` bewaart de persistente toestand als JSON in:
 
 ```text
-C:\ProgramData\NipperSessie\state.json
+C:\ProgramData\Poortwachter\state.json
 ```
 
 Het formaat bevat een versienummer en alleen de gegevens die nodig zijn voor herstel. `claimed_at` en `expires_at` worden in UTC opgeslagen.
