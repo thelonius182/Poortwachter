@@ -39,3 +39,25 @@ De webapp draait als container via Synology Container Manager en wordt gepublice
 **Reden**
 
 De DS918+ heeft Container Manager en Reverse Proxy beschikbaar; er is geen bestaande eigen webapp-stack waarmee rekening moet worden gehouden.
+
+## 2026-09-18 — Publieke hostname en certificaat
+
+**Besluit**
+
+De webapp wordt gepubliceerd als:
+
+```text
+https://nippersessie.concertzender.nl
+```
+
+Hiervoor wordt op de Synology een afzonderlijk Let's Encrypt-certificaat gebruikt, tenzij bij inrichting blijkt dat een bestaand certificaat deze hostname al dekt.
+
+Het certificaat wordt aan de NipperSessie reverse proxy toegewezen.
+
+**Randvoorwaarde**
+
+Voor uitrol moet `nippersessie.concertzender.nl` in DNS naar het publieke adres van de Synology verwijzen.
+
+**Reden**
+
+Poort 80 en 443 worden al vanaf de Ziggo-router naar de Synology doorgestuurd. Daardoor kan DSM een Let's Encrypt-certificaat voor deze hostname aanvragen en vernieuwen.
