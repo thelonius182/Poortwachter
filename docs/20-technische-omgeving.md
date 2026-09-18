@@ -64,10 +64,12 @@ Identiteit en autorisatie lopen via de Google Workspace van Stichting Concertzen
 
 ## Publieke toegang
 
-Voorkeursadres voor de webapp:
+Adres voor de webapp:
 
 ```text
 https://nippersessie.concertzender.nl
 ```
 
-Of dit adres al door een bestaand certificaat wordt gedekt, moet nog worden gecontroleerd.
+Voor deze hostname wordt op de Synology een afzonderlijk Let's Encrypt-certificaat gebruikt, tenzij bij inrichting blijkt dat een bestaand certificaat de hostname al dekt.
+
+Voor uitrol moet `nippersessie.concertzender.nl` in DNS naar het publieke adres van de Synology verwijzen.
