@@ -1,6 +1,6 @@
 # Toestandsmachine
 
-De pc-toestand en actieve claim worden uitsluitend beheerd door `NipperSessieService`.
+De pc-toestand en actieve claim worden uitsluitend beheerd door `PoortwachterService`.
 
 De toestanden zijn:
 
@@ -57,7 +57,7 @@ De precieze doorwerking van Splashtop in de pc-toestand en claimlogica wordt opn
 
 ### Verlengen
 
-Tien minuten voor `expires_at` kan `NipperSessie.exe` lokaal om verlenging vragen.
+Tien minuten voor `expires_at` kan `Poortwachter.exe` lokaal om verlenging vragen.
 
 Bij akkoord:
 
@@ -97,7 +97,7 @@ IN_GEBRUIK
 
 Een nieuwe claim kan niet worden aangemaakt.
 
-`NipperSessieService`:
+`PoortwachterService`:
 
 1. beëindigt bestaande AnyDesk-verbindingen;
 2. beëindigt bestaande TeamViewer-verbindingen;
@@ -181,10 +181,10 @@ De precieze invloed van remote-verbindingen op toestandsovergangen wordt voor Sp
 
 ## Persistente toestand
 
-`NipperSessieService` bewaart de persistente toestand in:
+`PoortwachterService` bewaart de persistente toestand in:
 
 ```text
-C:\ProgramData\NipperSessie\state.json
+C:\ProgramData\Poortwachter\state.json
 ```
 
 Het bestand bevat een versie en alleen de gegevens die nodig zijn om de claim en pc-toestand na herstart te herstellen. `claimed_at` en `expires_at` worden in UTC opgeslagen.
