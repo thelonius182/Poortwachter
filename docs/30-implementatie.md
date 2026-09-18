@@ -5,7 +5,7 @@
 - C# / .NET
 - ASP.NET Core voor de webapp
 - .NET Windows Service voor `NipperSessieService`
-- .NET Windows-app voor `NipperSessie.exe`
+- WinForms voor `NipperSessie.exe`
 
 Target frameworks:
 
@@ -15,6 +15,8 @@ NipperSessieService       net48
 NipperSessie.exe          net48
 NipperSessie.Contracts    netstandard2.0
 ```
+
+`NipperSessie.exe` wordt geïmplementeerd als WinForms-applicatie op .NET Framework 4.8. De applicatie verzorgt alleen de lokale 10-minutenmelding en het verzoek tot verlengen. Sessielogica blijft in `NipperSessieService`.
 
 `NipperSessie.Contracts` bevat gedeelde types voor het communicatiecontract en moet bruikbaar zijn vanuit zowel .NET Framework 4.8 als .NET 10.
 
