@@ -14,6 +14,8 @@ In medewerkerstekst heet een claim **sessie**. De zichtbare naam van het systeem
 
 ## 2. Claimmodel
 
+AnyDesk, TeamViewer en Splashtop worden gezamenlijk **remote-apps** genoemd.
+
 De pc-toestanden zijn:
 
 ```text
@@ -23,8 +25,9 @@ Start sessie
   ↓
 IN_GEBRUIK
   ↓
-Stop sessie
+remote verbinding verbroken
 of claim verlopen
+of binnen 2 minuten geen remote verbinding
   ↓
 AFSLUITEN
   ↓
@@ -34,13 +37,15 @@ VRIJ
 
 `WACHT_OP_VERBINDING` bestaat niet.
 
-Een remote verbinding via AnyDesk, TeamViewer of Splashtop maakt geen claim aan en bepaalt de eigenaar niet.
+Een remote verbinding via een remote-app maakt geen claim aan en bepaalt de eigenaar niet.
 
 Een claim duurt standaard één uur.
 
-De looptijd van de claim wordt bepaald door `PoortwachterService`. De claim ontstaat bij een geslaagde `CREATE_CLAIM`; een remote verbinding hoeft daarvoor niet tot stand te zijn gekomen.
+De looptijd van de claim wordt bepaald door `PoortwachterService`. De claim ontstaat bij een geslaagde `CREATE_CLAIM`.
 
-Een verbroken of opnieuw gemaakte remote verbinding verandert de looptijd van de claim niet.
+Na het aanmaken van de claim moet binnen twee minuten een remote verbinding via een remote-app tot stand komen. Gebeurt dat niet, dan laat `PoortwachterService` de claim vervallen en gaat de pc naar `AFSLUITEN`.
+
+Als de remote verbinding wordt verbroken, beëindigt `PoortwachterService` de claim en gaat de pc naar `AFSLUITEN`.
 
 De formele toestandsmachine, inclusief overgangen, foutafhandeling en herstel na herstart, staat in `15-toestandsmachine.md`.
 
@@ -120,7 +125,8 @@ De webapp:
 - verlengen;
 - verlopen;
 - afsluiten;
-- beschikbaarheid van AnyDesk en TeamViewer binnen Poortwachter.
+- beschikbaarheid van AnyDesk en TeamViewer binnen Poortwachter;
+- detectie van verbindingen via remote-apps.
 
 De webapp vraagt; de service beslist en bevestigt.
 
@@ -139,21 +145,23 @@ Splashtop     service SplashtopRemoteService
 
 Alle drie draaien machinebreed als `LocalSystem`.
 
-### Splashtop
+### Remote-apps
+
+AnyDesk, TeamViewer en Splashtop zijn de remote-apps.
+
+Bij `CREATE_CLAIM` maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar. Splashtop blijft altijd beschikbaar.
+
+De claim wordt alleen aangemaakt als AnyDesk en TeamViewer beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en wordt de claim niet aangemaakt.
+
+Na het aanmaken van de claim verwacht `PoortwachterService` binnen twee minuten een remote verbinding via een remote-app.
+
+Als een remote verbinding tot stand komt, blijft de claim actief tot:
+- de verbinding wordt verbroken; of
+- `expires_at` wordt bereikt.
+
+Bij beëindiging van de claim gaat de pc naar `AFSLUITEN`. De service beëindigt bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. Splashtop blijft ongemoeid.
 
 Splashtop wordt zowel voor gewone remote toegang als voor onderhoud/noodtoegang gebruikt.
-
-Poortwachter schakelt Splashtop niet in of uit; Splashtop blijft beschikbaar.
-
-Hoe een Splashtop-verbinding precies doorwerkt in de pc-toestand en claimlogica wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
-
-### AnyDesk en TeamViewer
-
-Bij `CREATE_CLAIM` maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar.
-
-De claim wordt alleen aangemaakt als beide beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en wordt de claim niet aangemaakt.
-
-Bij `Stop sessie` en bij verlopen van de claim beëindigt de service bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. Splashtop blijft ongemoeid.
 
 Tijdens het afsluiten kan geen nieuwe claim worden aangemaakt. De toestandovergangen staan in `15-toestandsmachine.md`.
 
@@ -232,7 +240,7 @@ Probeer het later opnieuw.
 
 ```
 
-Er zijn dan geen Start- of Stop-knoppen.
+Er is dan geen Start-knop.
 
 Na herstel stuurt `PoortwachterService` zijn volledige actuele toestand opnieuw.
 
@@ -261,8 +269,6 @@ Poortwachter
 Status: In gebruik
 
 Jouw sessie loopt nog 42 minuten.
-
-[ Stop sessie ]
 
 ```
 
@@ -305,15 +311,6 @@ Probeer het later opnieuw.
 Poortwachter
 
 Sessie wordt gestart…
-
-```
-
-### Stop wordt verwerkt
-
-```text
-Poortwachter
-
-Sessie wordt afgesloten…
 
 ```
 
@@ -388,21 +385,9 @@ user:
 
 ```
 
-### RELEASE\_CLAIM
-
-```text
-command: RELEASE_CLAIM
-request_id: <unieke id>
-user:
-  id: <Google-user-id>
-
-```
-
 De webapp controleert Google-authenticatie en groepslidmaatschap.
 
 De service vertrouwt de via de beveiligde verbinding aangeleverde Google-identiteit, maar controleert zelf of de opdracht past bij zijn actuele toestand.
-
-`RELEASE_CLAIM` wordt alleen geaccepteerd als `user.id` gelijk is aan de `owner.id` van de actieve claim.
 
 ---
 
@@ -525,7 +510,8 @@ Dit secret:
 De lokale logging bevat ten minste:
 
 - aanmaken van een claim;
-- vrijgeven van een claim;
+- beëindigen van een claim na verbreken van de remote verbinding;
+- vervallen van een claim zonder remote verbinding binnen twee minuten;
 - verlengen;
 - verlopen;
 - overgang naar `AFSLUITEN`;
@@ -544,7 +530,7 @@ De webapp logt ten minste:
 
 - Google-login geslaagd/mislukt;
 - controle van lidmaatschap van de `nipper-groep`;
-- verzonden `CREATE_CLAIM` en `RELEASE_CLAIM`;
+- verzonden `CREATE_CLAIM`;
 - ontvangen opdrachtresultaten;
 - verbinden/verbreken van `PoortwachterService`;
 - relevante communicatiefouten.
@@ -586,6 +572,7 @@ PoortwachterService
     autoriteit over pc-toestand en claim
     claimtijd
     lokale persistentie
+    remote-app-detectie
     AnyDesk en TeamViewer
     communicatie met webapp
 

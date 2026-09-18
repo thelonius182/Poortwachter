@@ -44,16 +44,27 @@ claimed_at
 expires_at
 ```
 
-Een remote-verbinding via AnyDesk of TeamViewer:
+Na `CREATE_CLAIM` moet binnen twee minuten een remote verbinding via een remote-app tot stand komen.
 
-- start de claim niet;
+Een remote verbinding:
+- maakt geen claim aan;
 - wijzigt de eigenaar niet;
 - wijzigt `claimed_at` niet;
 - wijzigt `expires_at` niet.
 
-Een verbroken remote-verbinding beëindigt de claim niet.
+Als binnen twee minuten geen remote verbinding tot stand komt:
 
-De precieze doorwerking van Splashtop in de pc-toestand en claimlogica wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
+```text
+IN_GEBRUIK
+→ AFSLUITEN
+```
+
+Als de remote verbinding wordt verbroken:
+
+```text
+IN_GEBRUIK
+→ AFSLUITEN
+```
 
 ### Verlengen
 
@@ -66,17 +77,6 @@ expires_at = expires_at + 1 uur
 ```
 
 De toestand blijft `IN_GEBRUIK`.
-
-### RELEASE_CLAIM
-
-`RELEASE_CLAIM` wordt alleen geaccepteerd als `user.id` gelijk is aan `owner.id`.
-
-Bij een geldige `RELEASE_CLAIM`:
-
-```text
-IN_GEBRUIK
-→ AFSLUITEN
-```
 
 ### Tijd verlopen
 
@@ -165,8 +165,8 @@ VRIJ
   ▼
 IN_GEBRUIK
   │
-  ├─ RELEASE_CLAIM
-  │
+  ├─ binnen 2 minuten geen remote verbinding
+  ├─ remote verbinding verbroken
   └─ expires_at bereikt
        │
        ▼
@@ -177,7 +177,7 @@ IN_GEBRUIK
       VRIJ
 ```
 
-De precieze invloed van remote-verbindingen op toestandsovergangen wordt voor Splashtop opnieuw uitgewerkt; zie `50-open-punten.md`.
+Remote verbindingen via AnyDesk, TeamViewer en Splashtop worden door `PoortwachterService` gedetecteerd en beïnvloeden de claim zoals hierboven beschreven.
 
 ## Persistente toestand
 
