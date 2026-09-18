@@ -1,6 +1,5 @@
 # Open punten
 
-- Wat doet Poortwachter met een Splashtop-verbinding die tot stand komt terwijl er geen actieve claim is?
 - Hoe maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar en niet beschikbaar, en hoe beëindigt de service actieve verbindingen?
 - Hoe wordt vastgesteld dat AnyDesk en TeamViewer tijdens `AFSLUITEN` beide zijn afgesloten?
 - Wat doet de service na een Windows-herstart als een nog geldige claim moet worden hersteld maar AnyDesk of TeamViewer niet beschikbaar kan worden gemaakt?
