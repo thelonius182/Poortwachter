@@ -37,4 +37,6 @@ Houd implementaties zo eenvoudig mogelijk, vooral wanneer ze specifiek nodig zij
 
 De webapp en `NipperSessieService` communiceren via WSS volgens `10-ontwerp.md`.
 
+`NipperSessie.exe` en `NipperSessieService` communiceren lokaal via `System.IO.Pipes`, zonder WCF. `NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client.
+
 Gedeelde .NET-types worden gebruikt voor het communicatiecontract.
