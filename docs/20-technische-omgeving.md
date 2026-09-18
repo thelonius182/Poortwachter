@@ -58,7 +58,7 @@ Er zijn vier gedeelde/functionele Windows-accounts.
 
 Medewerkers gebruiken hun eigen Windows-, macOS- of Linux-apparaat.
 
-Voor NipperSessie is daarop alleen een gewone webbrowser nodig.
+Voor Poortwachter is daarop alleen een gewone webbrowser nodig.
 
 Identiteit en autorisatie lopen via de Google Workspace van Stichting Concertzender.
 
