@@ -45,7 +45,7 @@ De looptijd van de claim wordt bepaald door `PoortwachterService`. De claim onts
 
 Na het aanmaken van de claim moet binnen twee minuten een remote verbinding via een remote-app tot stand komen. Gebeurt dat niet, dan laat `PoortwachterService` de claim vervallen en gaat de pc naar `AFSLUITEN`.
 
-Als de remote verbinding wordt verbroken, beëindigt `PoortwachterService` de claim en gaat de pc naar `AFSLUITEN`.
+Als de remote verbinding wordt verbroken, beëindigt `PoortwachterService` de claim en gaat de pc naar `AFSLUITEN`. Dit betekent het verbreken van de remote verbinding door de gebruiker; de remote-app zelf hoeft daarbij niet te worden gestopt.
 
 De formele toestandsmachine, inclusief overgangen, foutafhandeling en herstel na herstart, staat in `15-toestandsmachine.md`.
 
@@ -149,7 +149,7 @@ Alle drie draaien machinebreed als `LocalSystem`.
 
 AnyDesk, TeamViewer en Splashtop zijn de remote-apps.
 
-Bij `CREATE_CLAIM` maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar. Splashtop blijft altijd beschikbaar.
+Bij `CREATE_CLAIM` maakt `PoortwachterService` AnyDesk en TeamViewer beschikbaar. De Splashtop-streamer/service blijft altijd actief en beschikbaar als onderhoudsluik.
 
 De claim wordt alleen aangemaakt als AnyDesk en TeamViewer beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en wordt de claim niet aangemaakt.
 
@@ -159,9 +159,13 @@ Als een remote verbinding tot stand komt, blijft de claim actief tot:
 - de verbinding wordt verbroken; of
 - `expires_at` wordt bereikt.
 
-Bij beëindiging van de claim gaat de pc naar `AFSLUITEN`. De service beëindigt bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. Splashtop blijft ongemoeid.
+Bij beëindiging van de claim gaat de pc naar `AFSLUITEN`. De service beëindigt bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. De Splashtop-streamer/service blijft actief en beschikbaar.
 
 Splashtop wordt zowel voor gewone remote toegang als voor onderhoud/noodtoegang gebruikt.
+
+Als een Splashtop-verbinding tot stand komt terwijl er geen actieve claim is, wordt geen claim aangemaakt. De pc gaat wel naar `IN_GEBRUIK`. Zolang die Splashtop-verbinding actief is, wordt `CREATE_CLAIM` geweigerd.
+
+Als die Splashtop-verbinding door de gebruiker wordt verbroken en de bestaande 5-seconden-detectie bevestigt dat de verbinding weg is, gaat de pc rechtstreeks terug naar `VRIJ`. Er is dan geen claim om af te sluiten en AnyDesk en TeamViewer zijn al niet beschikbaar.
 
 Tijdens het afsluiten kan geen nieuwe claim worden aangemaakt. De toestandovergangen staan in `15-toestandsmachine.md`.
 
@@ -282,6 +286,17 @@ Status: In gebruik
 De Nipper-pc is in gebruik door Jan Jansen.
 
 Nog 27 minuten.
+
+```
+
+### In gebruik zonder sessie
+
+```text
+Poortwachter
+
+Status: In gebruik
+
+De Nipper-pc is in gebruik.
 
 ```
 
@@ -430,7 +445,7 @@ state: VRIJ
 
 ```
 
-### In gebruik
+### In gebruik met claim
 
 ```text
 status_id: <id>
@@ -444,6 +459,16 @@ claimed_at: <tijdstip>
 expires_at: <tijdstip>
 
 ```
+
+### In gebruik zonder claim
+
+```text
+status_id: <id>
+state: IN_GEBRUIK
+
+```
+
+Deze vorm wordt gebruikt wanneer de Nipper-pc via Splashtop in gebruik is zonder dat vooraf een claim is aangemaakt.
 
 ### Afsluiten
 
