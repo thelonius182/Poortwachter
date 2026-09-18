@@ -40,3 +40,17 @@ De webapp en `NipperSessieService` communiceren via WSS volgens `10-ontwerp.md`.
 `NipperSessie.exe` en `NipperSessieService` communiceren lokaal via `System.IO.Pipes`, zonder WCF. `NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client.
 
 Gedeelde .NET-types worden gebruikt voor het communicatiecontract.
+
+## Persistente toestand
+
+`NipperSessieService` bewaart de sessietoestand als JSON in:
+
+```text
+C:\ProgramData\NipperSessie\state.json
+```
+
+Het formaat bevat een versienummer en alleen de gegevens die nodig zijn voor herstel. `started_at` en `ends_at` worden in UTC opgeslagen.
+
+De service schrijft updates via `state.json.tmp`, voert `Flush(true)` uit, sluit het bestand en vervangt daarna `state.json` in één filesystem-operatie. Bij de eerste opslag wordt het tijdelijke bestand naar `state.json` verplaatst.
+
+Een achtergebleven tijdelijk bestand wordt niet als geldige toestand gebruikt. Als `state.json` ontbreekt of niet leesbaar is, maakt de service eerst AnyDesk en TeamViewer niet beschikbaar en schrijft pas daarna `VRIJ`.
