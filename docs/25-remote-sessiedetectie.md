@@ -1,6 +1,6 @@
 # Remote-sessiedetectie
 
-Dit document legt prototypebevindingen op de Nipper-pc vast. De betekenis van deze detectie voor pc-toestand en claimlogica staat in `10-ontwerp.md` en `15-toestandsmachine.md`; de precieze rol van Splashtop wordt opnieuw uitgewerkt.
+Dit document legt prototypebevindingen op de Nipper-pc vast. AnyDesk, TeamViewer en Splashtop worden gezamenlijk **remote-apps** genoemd. De detectie van het begin en einde van hun remote verbindingen is onderdeel van de claimlogica; zie `10-ontwerp.md` en `15-toestandsmachine.md`.
 
 ## AnyDesk
 
@@ -63,7 +63,7 @@ De vijf seconden zijn debounce omdat de `SRApp.exe`-processen na elkaar verdwijn
 
 Getest bij normaal verbreken en abrupt afsluiten van de Splashtop-client. Dit is geobserveerd procesgedrag, geen gedocumenteerde sessie-API.
 
-De rol van Splashtop in de toegangsregeling en toestandsmachine wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
+Splashtop-verbindingen worden voor de claimlogica op dezelfde manier behandeld als verbindingen via AnyDesk en TeamViewer. Alleen de technische detectiemethode verschilt.
 
 ## Prototype
 
@@ -81,4 +81,4 @@ C:\Users\Gebruiker\Documents\WindowsPowerShell\Scripts\remote_session_watch.ps1
 
 De repository bevat bewust de oorspronkelijke prototypeversie. De watcher combineert de drie bovenstaande detectors. De daarin aanwezige oude claim- en toestandslogica is achterhaald en is geen onderdeel van het huidige ontwerp.
 
-De detectieproeven kunnen bij de implementatie worden gebruikt voor diagnose en, voor AnyDesk en TeamViewer, voor het vaststellen of verbindingen tijdens `AFSLUITEN` zijn beëindigd.
+De detectieproeven worden bij de implementatie gebruikt voor het vaststellen of binnen twee minuten na `CREATE_CLAIM` een remote verbinding tot stand komt, wanneer die verbinding eindigt en, voor AnyDesk en TeamViewer, of verbindingen tijdens `AFSLUITEN` zijn beëindigd.
