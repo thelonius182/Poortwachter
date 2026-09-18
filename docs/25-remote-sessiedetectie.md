@@ -1,6 +1,6 @@
 # Remote-sessiedetectie
 
-Dit document legt prototypebevindingen op de Nipper-pc vast. Remote-sessies bepalen volgens het huidige ontwerp de Poortwachter-toestand niet; zie `10-ontwerp.md` en `15-toestandsmachine.md`.
+Dit document legt prototypebevindingen op de Nipper-pc vast. De betekenis van deze detectie voor pc-toestand en claimlogica staat in `10-ontwerp.md` en `15-toestandsmachine.md`; de precieze rol van Splashtop wordt opnieuw uitgewerkt.
 
 ## AnyDesk
 
