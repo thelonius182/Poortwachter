@@ -1,6 +1,6 @@
 # Remote-sessiedetectie
 
-Dit document legt prototypebevindingen op de Nipper-pc vast. Remote-sessies bepalen de NipperSessie-toestand niet; zie `10-ontwerp.md` en `15-toestandsmachine.md`.
+Dit document legt prototypebevindingen op de Nipper-pc vast. Remote-sessies bepalen volgens het huidige ontwerp de Poortwachter-toestand niet; zie `10-ontwerp.md` en `15-toestandsmachine.md`.
 
 ## AnyDesk
 
@@ -63,7 +63,7 @@ De vijf seconden zijn debounce omdat de `SRApp.exe`-processen na elkaar verdwijn
 
 Getest bij normaal verbreken en abrupt afsluiten van de Splashtop-client. Dit is geobserveerd procesgedrag, geen gedocumenteerde sessie-API.
 
-Splashtop valt buiten de toegangsregeling en toestandsmachine van NipperSessie.
+De rol van Splashtop in de toegangsregeling en toestandsmachine wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
 
 ## Prototype
 
