@@ -74,17 +74,17 @@ Poort 80 en 443 worden al vanaf de Ziggo-router naar de Synology doorgestuurd. D
 
 De communicatie betreft twee processen op dezelfde Windows-pc en heeft een klein protocol nodig voor de lokale melding en verlengen. Directe named-pipe-IPC lost dit op zonder extra broker, netwerkservice of WCF-laag. Dit sluit aan bij de projectcriteria proportionaliteit en subsidiariteit.
 
-## 2026-09-18 — Persistente sessietoestand
+## 2026-09-18 — Persistente toestand
 
 **Besluit**
 
-`NipperSessieService` bewaart de sessietoestand als één JSON-bestand in:
+`NipperSessieService` bewaart de persistente toestand als één JSON-bestand in:
 
 ```text
 C:\ProgramData\NipperSessie\state.json
 ```
 
-Het formaat bevat een versienummer en alleen de gegevens die voor herstel nodig zijn. `started_at` en `ends_at` worden in UTC opgeslagen.
+Het formaat bevat een versienummer en alleen de gegevens die voor herstel nodig zijn. `claimed_at` en `expires_at` worden in UTC opgeslagen.
 
 Updates worden via een tijdelijk bestand geschreven, met `Flush(true)`, en daarna wordt `state.json` in één filesystem-operatie vervangen. Er is geen automatische fallback naar een oude backup.
 
