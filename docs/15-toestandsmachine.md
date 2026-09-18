@@ -116,7 +116,7 @@ Als dat niet lukt, blijft de toestand `AFSLUITEN`. De service blijft proberen de
 
 ## Herstart van Windows
 
-De sessietoestand wordt persistent opgeslagen.
+De sessietoestand wordt persistent opgeslagen volgens `30-implementatie.md`.
 
 ### Geen actieve sessie
 
@@ -178,3 +178,24 @@ IN_GEBRUIK
 ```
 
 Remote-verbindingen vormen geen toestanden en veroorzaken geen toestandsovergangen.
+
+## Persistente sessietoestand
+
+`NipperSessieService` bewaart de persistente sessietoestand in:
+
+```text
+C:\ProgramData\NipperSessie\state.json
+```
+
+Het bestand bevat een versie en alleen de gegevens die nodig zijn om de sessietoestand na herstart te herstellen. `started_at` en `ends_at` worden in UTC opgeslagen.
+
+Updates worden niet in-place geschreven:
+
+1. schrijf de volledige nieuwe toestand naar `state.json.tmp`;
+2. flush het bestand naar disk met `Flush(true)`;
+3. sluit het tijdelijke bestand;
+4. vervang daarna `state.json` in één filesystem-operatie; bij de eerste opslag wordt het tijdelijke bestand naar `state.json` verplaatst.
+
+Een achtergebleven `state.json.tmp` wordt bij startup niet als geldige toestand gebruikt.
+
+Als `state.json` ontbreekt of niet betrouwbaar kan worden gelezen, gaat de service fail-closed te werk: AnyDesk en TeamViewer worden eerst niet beschikbaar gemaakt. Pas nadat dat is gelukt, wordt `VRIJ` opgeslagen.
