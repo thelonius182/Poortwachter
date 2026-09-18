@@ -16,7 +16,7 @@ NipperSessie.exe          net48
 NipperSessie.Contracts    netstandard2.0
 ```
 
-`NipperSessie.exe` wordt geïmplementeerd als WinForms-applicatie op .NET Framework 4.8. De applicatie verzorgt alleen de lokale 10-minutenmelding en het verzoek tot verlengen. Sessielogica blijft in `NipperSessieService`.
+`NipperSessie.exe` wordt geïmplementeerd als WinForms-applicatie op .NET Framework 4.8. De applicatie verzorgt alleen de lokale 10-minutenmelding en het verzoek tot verlengen. Claimlogica blijft in `NipperSessieService`.
 
 `NipperSessie.Contracts` bevat gedeelde types voor het communicatiecontract en moet bruikbaar zijn vanuit zowel .NET Framework 4.8 als .NET 10.
 
@@ -43,13 +43,13 @@ Gedeelde .NET-types worden gebruikt voor het communicatiecontract.
 
 ## Persistente toestand
 
-`NipperSessieService` bewaart de sessietoestand als JSON in:
+`NipperSessieService` bewaart de persistente toestand als JSON in:
 
 ```text
 C:\ProgramData\NipperSessie\state.json
 ```
 
-Het formaat bevat een versienummer en alleen de gegevens die nodig zijn voor herstel. `started_at` en `ends_at` worden in UTC opgeslagen.
+Het formaat bevat een versienummer en alleen de gegevens die nodig zijn voor herstel. `claimed_at` en `expires_at` worden in UTC opgeslagen.
 
 De service schrijft updates via `state.json.tmp`, voert `Flush(true)` uit, sluit het bestand en vervangt daarna `state.json` in één filesystem-operatie. Bij de eerste opslag wordt het tijdelijke bestand naar `state.json` verplaatst.
 
