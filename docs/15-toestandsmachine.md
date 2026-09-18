@@ -147,7 +147,7 @@ Als:
 ```text
 state = IN_GEBRUIK
 en
-nu >= ends_at
+nu >= expires_at
 ```
 
 dan wordt de toestand `AFSLUITEN`. De verlopen claim wordt niet opnieuw actief gemaakt.
