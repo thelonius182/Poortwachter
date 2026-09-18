@@ -1,6 +1,6 @@
 # Toestandsmachine
 
-De sessietoestand wordt uitsluitend beheerd door `NipperSessieService`.
+De pc-toestand en actieve claim worden uitsluitend beheerd door `NipperSessieService`.
 
 De toestanden zijn:
 
@@ -12,18 +12,18 @@ AFSLUITEN
 
 ## VRIJ
 
-Er is geen actieve NipperSessie. AnyDesk en TeamViewer zijn niet beschikbaar.
+Er is geen actieve claim. AnyDesk en TeamViewer zijn niet beschikbaar.
 
-### START_SESSION
+### CREATE_CLAIM
 
-Bij een geldige `START_SESSION`:
+Bij een geldige `CREATE_CLAIM`:
 
 1. maak AnyDesk beschikbaar;
 2. maak TeamViewer beschikbaar;
 3. alleen als beide acties slagen:
    - leg eigenaar vast;
-   - zet `started_at = nu`;
-   - zet `ends_at = nu + 1 uur`;
+   - zet `claimed_at = nu`;
+   - zet `expires_at = nu + 1 uur`;
    - ga naar `IN_GEBRUIK`.
 
 Als één van beide remote-tools niet beschikbaar kan worden gemaakt:
@@ -32,46 +32,46 @@ Als één van beide remote-tools niet beschikbaar kan worden gemaakt:
 2. blijf `VRIJ`;
 3. geef `FAILED` terug.
 
-Wijzigingen aan de sessietoestand worden één voor één verwerkt.
+Wijzigingen aan de pc-toestand en claim worden één voor één verwerkt.
 
 ## IN_GEBRUIK
 
-Er is één actieve NipperSessie. Vastgelegd zijn:
+Er is één actieve claim. Vastgelegd zijn:
 
 ```text
 owner
-started_at
-ends_at
+claimed_at
+expires_at
 ```
 
 Een remote-verbinding via AnyDesk of TeamViewer:
 
-- start de NipperSessie niet;
+- start de claim niet;
 - wijzigt de eigenaar niet;
-- wijzigt `started_at` niet;
-- wijzigt `ends_at` niet.
+- wijzigt `claimed_at` niet;
+- wijzigt `expires_at` niet.
 
-Een verbroken remote-verbinding beëindigt de NipperSessie niet.
+Een verbroken remote-verbinding beëindigt de claim niet.
 
-Splashtop heeft geen invloed op de sessietoestand.
+De precieze doorwerking van Splashtop in de pc-toestand en claimlogica wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
 
 ### Verlengen
 
-Tien minuten voor `ends_at` kan `NipperSessie.exe` lokaal om verlenging vragen.
+Tien minuten voor `expires_at` kan `NipperSessie.exe` lokaal om verlenging vragen.
 
 Bij akkoord:
 
 ```text
-ends_at = ends_at + 1 uur
+expires_at = expires_at + 1 uur
 ```
 
 De toestand blijft `IN_GEBRUIK`.
 
-### STOP_SESSION
+### RELEASE_CLAIM
 
-`STOP_SESSION` wordt alleen geaccepteerd als `user.id` gelijk is aan `owner.id`.
+`RELEASE_CLAIM` wordt alleen geaccepteerd als `user.id` gelijk is aan `owner.id`.
 
-Bij een geldige `STOP_SESSION`:
+Bij een geldige `RELEASE_CLAIM`:
 
 ```text
 IN_GEBRUIK
@@ -83,7 +83,7 @@ IN_GEBRUIK
 Als:
 
 ```text
-nu >= ends_at
+nu >= expires_at
 ```
 
 dan:
@@ -95,7 +95,7 @@ IN_GEBRUIK
 
 ## AFSLUITEN
 
-Een nieuwe NipperSessie kan niet worden gestart.
+Een nieuwe claim kan niet worden aangemaakt.
 
 `NipperSessieService`:
 
@@ -116,41 +116,41 @@ Als dat niet lukt, blijft de toestand `AFSLUITEN`. De service blijft proberen de
 
 ## Herstart van Windows
 
-De sessietoestand wordt persistent opgeslagen volgens `30-implementatie.md`.
+De claim en pc-toestand worden persistent opgeslagen volgens `30-implementatie.md`.
 
-### Geen actieve sessie
+### Geen actieve claim
 
 Na een herstart zorgt de service dat AnyDesk en TeamViewer niet beschikbaar zijn. Daarna is de toestand `VRIJ`.
 
-### Actieve sessie, eindtijd nog niet bereikt
+### Actieve claim, eindtijd nog niet bereikt
 
 Als:
 
 ```text
 state = IN_GEBRUIK
 en
-nu < ends_at
+nu < expires_at
 ```
 
 dan:
 
-1. behoud eigenaar, `started_at` en `ends_at`;
+1. behoud eigenaar, `claimed_at` en `expires_at`;
 2. maak AnyDesk en TeamViewer beschikbaar;
 3. herstel `IN_GEBRUIK`.
 
 Het gedrag als AnyDesk of TeamViewer hierbij niet beschikbaar kan worden gemaakt, is nog niet bepaald; zie `50-open-punten.md`.
 
-### Actieve sessie, eindtijd verstreken
+### Actieve claim, eindtijd verstreken
 
 Als:
 
 ```text
 state = IN_GEBRUIK
 en
-nu >= ends_at
+nu >= expires_at
 ```
 
-dan wordt de toestand `AFSLUITEN`. De verlopen sessie wordt niet opnieuw beschikbaar gemaakt.
+dan wordt de toestand `AFSLUITEN`. De verlopen claim wordt niet opnieuw actief gemaakt.
 
 ### Herstart tijdens AFSLUITEN
 
@@ -161,13 +161,13 @@ Als de persistente toestand `AFSLUITEN` is, hervat de service het afsluiten totd
 ```text
 VRIJ
   │
-  │ START_SESSION geslaagd
+  │ CREATE_CLAIM geslaagd
   ▼
 IN_GEBRUIK
   │
-  ├─ STOP_SESSION
+  ├─ RELEASE_CLAIM
   │
-  └─ ends_at bereikt
+  └─ expires_at bereikt
        │
        ▼
    AFSLUITEN
@@ -177,17 +177,17 @@ IN_GEBRUIK
       VRIJ
 ```
 
-Remote-verbindingen vormen geen toestanden en veroorzaken geen toestandsovergangen.
+De precieze invloed van remote-verbindingen op toestandsovergangen wordt voor Splashtop opnieuw uitgewerkt; zie `50-open-punten.md`.
 
-## Persistente sessietoestand
+## Persistente toestand
 
-`NipperSessieService` bewaart de persistente sessietoestand in:
+`NipperSessieService` bewaart de persistente toestand in:
 
 ```text
 C:\ProgramData\NipperSessie\state.json
 ```
 
-Het bestand bevat een versie en alleen de gegevens die nodig zijn om de sessietoestand na herstart te herstellen. `started_at` en `ends_at` worden in UTC opgeslagen.
+Het bestand bevat een versie en alleen de gegevens die nodig zijn om de claim en pc-toestand na herstart te herstellen. `claimed_at` en `expires_at` worden in UTC opgeslagen.
 
 Updates worden niet in-place geschreven:
 

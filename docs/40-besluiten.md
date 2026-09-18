@@ -74,17 +74,17 @@ Poort 80 en 443 worden al vanaf de Ziggo-router naar de Synology doorgestuurd. D
 
 De communicatie betreft twee processen op dezelfde Windows-pc en heeft een klein protocol nodig voor de lokale melding en verlengen. Directe named-pipe-IPC lost dit op zonder extra broker, netwerkservice of WCF-laag. Dit sluit aan bij de projectcriteria proportionaliteit en subsidiariteit.
 
-## 2026-09-18 — Persistente sessietoestand
+## 2026-09-18 — Persistente toestand
 
 **Besluit**
 
-`NipperSessieService` bewaart de sessietoestand als één JSON-bestand in:
+`NipperSessieService` bewaart de persistente toestand als één JSON-bestand in:
 
 ```text
 C:\ProgramData\NipperSessie\state.json
 ```
 
-Het formaat bevat een versienummer en alleen de gegevens die voor herstel nodig zijn. `started_at` en `ends_at` worden in UTC opgeslagen.
+Het formaat bevat een versienummer en alleen de gegevens die voor herstel nodig zijn. `claimed_at` en `expires_at` worden in UTC opgeslagen.
 
 Updates worden via een tijdelijk bestand geschreven, met `Flush(true)`, en daarna wordt `state.json` in één filesystem-operatie vervangen. Er is geen automatische fallback naar een oude backup.
 
@@ -93,3 +93,28 @@ Als `state.json` ontbreekt of ongeldig is, wordt fail-closed hersteld: AnyDesk e
 **Reden**
 
 Voor één lokale toestandrecord is een JSON-bestand eenvoudiger dan registry of een database. De schrijfstrategie voorkomt in-place overschrijven van de enige geldige toestand. Fail-closed herstel voorkomt dat beschadigde persistentie remote toegang vrijgeeft.
+
+
+## 2026-09-19 — Applicatienaam en claimterminologie
+
+**Besluit**
+
+De zichtbare naam van de applicatie is **Poortwachter**.
+
+Intern heet het tijdelijke gebruiksrecht op de Nipper-pc een **claim**. In medewerkerstekst blijft daarvoor het woord **sessie** gebruikt worden.
+
+De interne opdrachten heten:
+
+- `CREATE_CLAIM`
+- `RELEASE_CLAIM`
+
+De tijdvelden heten:
+
+- `claimed_at`
+- `expires_at`
+
+De bestaande technische componentnamen `NipperSessieService`, `NipperSessie.exe`, `NipperSessie.Web` en de hostname `nippersessie.concertzender.nl` blijven voorlopig ongewijzigd.
+
+**Reden**
+
+De applicatienaam en het domeinbegrip waren beide gebaseerd op het woord sessie. Dat werd onduidelijk zodra remote sessies en de toestand van de Nipper-pc afzonderlijk moesten worden beschreven. De term claim onderscheidt het tijdelijke gebruiksrecht van een remote verbinding; medewerkerstekst kan het kortere begrip sessie blijven gebruiken.

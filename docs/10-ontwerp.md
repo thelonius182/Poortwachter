@@ -1,28 +1,30 @@
-# NipperSessie — geconsolideerd ontwerp
+# Poortwachter — geconsolideerd ontwerp
 
 ## 1. Doel
 
-NipperSessie regelt het exclusieve gebruik op afstand van één Windows 10-pc van Stichting Concertzender: de **Nipper-pc**.
+Poortwachter regelt het exclusieve gebruik op afstand van één Windows 10-pc van Stichting Concertzender: de **Nipper-pc**.
 
-Er kan maximaal één NipperSessie tegelijk actief zijn.
+Er kan maximaal één claim tegelijk actief zijn.
 
-Medewerkerstekst gebruikt steeds het begrip **sessie**. De zichtbare naam van het systeem is **NipperSessie**.
+Intern gebruikt Poortwachter het begrip **claim** voor het tijdelijke gebruiksrecht op de Nipper-pc.
+
+In medewerkerstekst heet een claim **sessie**. De zichtbare naam van het systeem is **Poortwachter**.
 
 ---
 
-## 2. Sessiemodel
+## 2. Claimmodel
 
-De sessietoestanden zijn:
+De pc-toestanden zijn:
 
 ```text
 VRIJ
   ↓
-Start NipperSessie
+Start sessie
   ↓
 IN_GEBRUIK
   ↓
 Stop sessie
-of sessietijd verlopen
+of claim verlopen
   ↓
 AFSLUITEN
   ↓
@@ -32,23 +34,23 @@ VRIJ
 
 `WACHT_OP_VERBINDING` bestaat niet.
 
-Een remote verbinding via AnyDesk, TeamViewer of Splashtop start geen NipperSessie en bepaalt de eigenaar niet.
+Een remote verbinding via AnyDesk, TeamViewer of Splashtop maakt geen claim aan en bepaalt de eigenaar niet.
 
-Een sessie duurt standaard één uur.
+Een claim duurt standaard één uur.
 
-De sessieduur wordt bepaald door `NipperSessieService`. De sessie begint bij een geslaagde `START_SESSION`; een remote verbinding hoeft daarvoor niet tot stand te zijn gekomen.
+De looptijd van de claim wordt bepaald door `NipperSessieService`. De claim ontstaat bij een geslaagde `CREATE_CLAIM`; een remote verbinding hoeft daarvoor niet tot stand te zijn gekomen.
 
-Een verbroken of opnieuw gemaakte remote verbinding verandert de sessieduur niet.
+Een verbroken of opnieuw gemaakte remote verbinding verandert de looptijd van de claim niet.
 
 De formele toestandsmachine, inclusief overgangen, foutafhandeling en herstel na herstart, staat in `15-toestandsmachine.md`.
 
 ---
 
-## 3. Eigenaar van de sessie
+## 3. Eigenaar van de claim
 
-De Google Workspace-gebruiker die `Start NipperSessie` uitvoert, is eigenaar van de sessie.
+De Google Workspace-gebruiker die in de UI `Start sessie` uitvoert, is eigenaar van de claim.
 
-De vier Windows-accounts op de Nipper-pc zijn gedeelde/functionele accounts en vormen geen identiteit binnen NipperSessie.
+De vier Windows-accounts op de Nipper-pc zijn gedeelde/functionele accounts en vormen geen identiteit binnen Poortwachter.
 
 Ontwerpregel:
 
@@ -60,7 +62,7 @@ De vaste Google user id wordt gebruikt voor identificatie. De Google Workspace-w
 
 ## 4. Authenticatie en autorisatie
 
-NipperSessie beheert geen eigen gebruikers of wachtwoorden.
+Poortwachter beheert geen eigen gebruikers of wachtwoorden.
 
 ```text
 Google Workspace login
@@ -72,7 +74,7 @@ nee → geen toegang
 
 ```
 
-De medewerker gebruikt alleen een gewone browser. Op het eigen Windows-, macOS- of Linux-apparaat hoeft niets van NipperSessie te worden geïnstalleerd.
+De medewerker gebruikt alleen een gewone browser. Op het eigen Windows-, macOS- of Linux-apparaat hoeft niets van Poortwachter te worden geïnstalleerd.
 
 Een gebruiker die geen lid is van de groep ziet bijvoorbeeld:
 
@@ -102,7 +104,7 @@ De webapp:
 - stuurt opdrachten naar `NipperSessieService`;
 - toont de door de service gemelde toestand;
 - mag de laatst ontvangen toestand bewaren;
-- beslist niet zelfstandig over de sessietoestand.
+- beslist niet zelfstandig over de pc-toestand of claim.
 
 ---
 
@@ -110,14 +112,15 @@ De webapp:
 
 `NipperSessieService` op de Nipper-pc is de enige autoriteit over:
 
-- sessietoestand;
+- pc-toestand;
+- actieve claim;
 - eigenaar;
 - starttijd;
 - eindtijd;
 - verlengen;
 - verlopen;
 - afsluiten;
-- beschikbaarheid van AnyDesk en TeamViewer binnen NipperSessie.
+- beschikbaarheid van AnyDesk en TeamViewer binnen Poortwachter.
 
 De webapp vraagt; de service beslist en bevestigt.
 
@@ -138,26 +141,21 @@ Alle drie draaien machinebreed als `LocalSystem`.
 
 ### Splashtop
 
-Splashtop is de beheer-/noodroute.
+Splashtop wordt zowel voor gewone remote toegang als voor onderhoud/noodtoegang gebruikt.
 
-NipperSessie:
+Poortwachter schakelt Splashtop niet in of uit; Splashtop blijft beschikbaar.
 
-- schakelt Splashtop nooit uit;
-- schakelt Splashtop niet in;
-- gebruikt Splashtop niet om een medewerker te identificeren;
-- gebruikt Splashtop niet om een sessie te starten of beëindigen.
-
-Onderhoud loopt buiten NipperSessie via het onderhoudsluik en zo nodig Splashtop.
+Hoe een Splashtop-verbinding precies doorwerkt in de pc-toestand en claimlogica wordt opnieuw uitgewerkt; zie `50-open-punten.md`.
 
 ### AnyDesk en TeamViewer
 
-Bij `Start NipperSessie` maakt `NipperSessieService` AnyDesk en TeamViewer beschikbaar.
+Bij `CREATE_CLAIM` maakt `NipperSessieService` AnyDesk en TeamViewer beschikbaar.
 
-De sessie start alleen als beide beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en start de sessie niet.
+De claim wordt alleen aangemaakt als beide beschikbaar kunnen worden gemaakt. Mislukt dat voor één van beide, dan wordt een eventuele gedeeltelijke wijziging teruggedraaid en wordt de claim niet aangemaakt.
 
-Bij `Stop sessie` en bij verlopen van de sessietijd beëindigt de service bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. Splashtop blijft ongemoeid.
+Bij `Stop sessie` en bij verlopen van de claim beëindigt de service bestaande AnyDesk- en TeamViewer-verbindingen en maakt beide tools niet beschikbaar. Splashtop blijft ongemoeid.
 
-Tijdens het afsluiten kan geen nieuwe sessie worden gestart. De toestandovergangen staan in `15-toestandsmachine.md`.
+Tijdens het afsluiten kan geen nieuwe claim worden aangemaakt. De toestandovergangen staan in `15-toestandsmachine.md`.
 
 De medewerker ziet dan:
 
@@ -173,7 +171,7 @@ Status: Nipper-pc is de vorige sessie nog aan het afsluiten
 Tien minuten voor het eindtijdstip verschijnt lokaal op de Nipper-pc:
 
 ```text
-NipperSessie
+Poortwachter
 
 Je sessie verloopt over 10 minuten.
 
@@ -185,7 +183,7 @@ Verlengen met 1 uur?
 
 `Ja`:
 
-- verlengt `ends_at` met één uur;
+- verlengt `expires_at` met één uur;
 - sluit de melding.
 
 `Nee`:
@@ -207,23 +205,23 @@ De lokale communicatie gebruikt `System.IO.Pipes`. `NipperSessieService` is de n
 
 ## 9. Herstart van de Nipper-pc
 
-Een herstart verandert eigenaar en eindtijd van een lopende sessie niet.
+Een herstart verandert eigenaar en eindtijd van een lopende claim niet.
 
-De sessietoestand wordt lokaal persistent opgeslagen. `NipperSessieService` herstelt na een herstart de juiste toestand en beschikbaarheid van AnyDesk en TeamViewer. De herstelregels staan in `15-toestandsmachine.md`.
+De claim en pc-toestand worden lokaal persistent opgeslagen. `NipperSessieService` herstelt na een herstart de juiste toestand en beschikbaarheid van AnyDesk en TeamViewer. De herstelregels staan in `15-toestandsmachine.md`.
 
 ---
 
 ## 10. Uitval van NAS, webapp of netwerk
 
-Een lopende sessie is niet afhankelijk van de Synology-webapp.
+Een actieve claim is niet afhankelijk van de Synology-webapp.
 
 Bij verlies van contact:
 
-- blijft de sessie lokaal doorlopen;
+- blijft de claim lokaal doorlopen;
 - blijven eigenaar en eindtijd gelijk;
 - blijft de 10-minutenmelding werken;
 - kan lokaal worden verlengd;
-- beëindigt de service de sessie zelfstandig wanneer de tijd verloopt.
+- laat de service de claim zelfstandig verlopen wanneer de tijd is bereikt.
 
 De webapp toont bij verlies van de verbinding:
 
@@ -245,20 +243,20 @@ Na herstel stuurt `NipperSessieService` zijn volledige actuele toestand opnieuw.
 ### Vrij
 
 ```text
-NipperSessie
+Poortwachter
 
 Status: Vrij
 
 De Nipper-pc is beschikbaar.
 
-[ Start NipperSessie ]
+[ Start sessie ]
 
 ```
 
 ### Eigen sessie
 
 ```text
-NipperSessie
+Poortwachter
 
 Status: In gebruik
 
@@ -271,7 +269,7 @@ Jouw sessie loopt nog 42 minuten.
 ### Sessie van iemand anders
 
 ```text
-NipperSessie
+Poortwachter
 
 Status: In gebruik
 
@@ -284,7 +282,7 @@ Nog 27 minuten.
 ### Afsluiten
 
 ```text
-NipperSessie
+Poortwachter
 
 Status: Nipper-pc is de vorige sessie nog aan het afsluiten
 
@@ -293,7 +291,7 @@ Status: Nipper-pc is de vorige sessie nog aan het afsluiten
 ### Niet bereikbaar
 
 ```text
-NipperSessie
+Poortwachter
 
 Status: Nipper-pc is niet bereikbaar
 
@@ -304,25 +302,25 @@ Probeer het later opnieuw.
 ### Start wordt verwerkt
 
 ```text
-NipperSessie
+Poortwachter
 
-NipperSessie wordt gestart…
+Sessie wordt gestart…
 
 ```
 
 ### Stop wordt verwerkt
 
 ```text
-NipperSessie
+Poortwachter
 
-NipperSessie wordt afgesloten…
+Sessie wordt afgesloten…
 
 ```
 
 ### Start mislukt
 
 ```text
-NipperSessie kon niet worden gestart.
+De sessie kon niet worden gestart.
 
 ```
 
@@ -336,7 +334,7 @@ De precieze formulering van medewerkersteksten kan later nog worden aangescherpt
 
 Een open webpagina wordt automatisch bijgewerkt.
 
-De resterende tijd kan in de browser aftellen, maar de door `NipperSessieService` gemelde `ends_at` blijft bepalend.
+De resterende tijd kan in de browser aftellen, maar de door `NipperSessieService` gemelde `expires_at` blijft bepalend.
 
 Bij verlenging wordt de nieuwe eindtijd automatisch in de UI verwerkt.
 
@@ -379,10 +377,10 @@ service → webapp
 
 ## 14. Opdrachten
 
-### START\_SESSION
+### CREATE\_CLAIM
 
 ```text
-command: START_SESSION
+command: CREATE_CLAIM
 request_id: <unieke id>
 user:
   id: <Google-user-id>
@@ -390,10 +388,10 @@ user:
 
 ```
 
-### STOP\_SESSION
+### RELEASE\_CLAIM
 
 ```text
-command: STOP_SESSION
+command: RELEASE_CLAIM
 request_id: <unieke id>
 user:
   id: <Google-user-id>
@@ -404,7 +402,7 @@ De webapp controleert Google-authenticatie en groepslidmaatschap.
 
 De service vertrouwt de via de beveiligde verbinding aangeleverde Google-identiteit, maar controleert zelf of de opdracht past bij zijn actuele toestand.
 
-`STOP_SESSION` wordt alleen geaccepteerd als `user.id` gelijk is aan de `owner.id` van de actieve sessie.
+`RELEASE_CLAIM` wordt alleen geaccepteerd als `user.id` gelijk is aan de `owner.id` van de actieve claim.
 
 ---
 
@@ -457,8 +455,8 @@ owner:
   id: <Google-user-id>
   display_name: Jan Jansen
 
-started_at: <tijdstip>
-ends_at: <tijdstip>
+claimed_at: <tijdstip>
+expires_at: <tijdstip>
 
 ```
 
@@ -478,9 +476,9 @@ De webapp vervangt zijn vorige status door het complete nieuwe statusbericht.
 
 ## 17. Gelijktijdige opdrachten
 
-Wijzigingen aan de sessietoestand worden door `NipperSessieService` één voor één verwerkt.
+Wijzigingen aan de pc-toestand en claim worden door `NipperSessieService` één voor één verwerkt.
 
-Bij twee vrijwel gelijktijdige Start-opdrachten kan daarom maar één opdracht slagen.
+Bij twee vrijwel gelijktijdige `CREATE_CLAIM`-opdrachten kan daarom maar één opdracht slagen.
 
 De andere krijgt een foutresultaat en daarna de actuele toestand.
 
@@ -501,7 +499,7 @@ Voor verbindingsbewaking:
 - bij een expliciet verbroken WebSocket kan dit direct worden vastgesteld;
 - na herstel wordt opnieuw een volledige status gestuurd.
 
-Heartbeats zijn geen onderdeel van de sessietoestand en hoeven niet afzonderlijk te worden gelogd.
+Heartbeats zijn geen onderdeel van de pc-toestand of claim en hoeven niet afzonderlijk te worden gelogd.
 
 ---
 
@@ -526,8 +524,8 @@ Dit secret:
 
 De lokale logging bevat ten minste:
 
-- starten van een sessie;
-- stoppen;
+- aanmaken van een claim;
+- vrijgeven van een claim;
 - verlengen;
 - verlopen;
 - overgang naar `AFSLUITEN`;
@@ -546,18 +544,18 @@ De webapp logt ten minste:
 
 - Google-login geslaagd/mislukt;
 - controle van lidmaatschap van de `nipper-groep`;
-- verzonden `START_SESSION` en `STOP_SESSION`;
+- verzonden `CREATE_CLAIM` en `RELEASE_CLAIM`;
 - ontvangen opdrachtresultaten;
 - verbinden/verbreken van `NipperSessieService`;
 - relevante communicatiefouten.
 
-De webapp houdt geen eigen sessiegeschiedenis bij om daarmee de toestand te reconstrueren.
+De webapp houdt geen eigen claimgeschiedenis bij om daarmee de toestand te reconstrueren.
 
 ---
 
 ## 21. Geen beheer-UI
 
-NipperSessie krijgt geen aparte beheerpagina.
+Poortwachter krijgt geen aparte beheerpagina.
 
 Technische diagnose en onderhoud lopen via het bestaande onderhoudsluik en zo nodig Splashtop.
 
@@ -585,8 +583,8 @@ Synology-webapp
     tonen van actuele status
 
 NipperSessieService
-    autoriteit over sessie
-    sessietijd
+    autoriteit over pc-toestand en claim
+    claimtijd
     lokale persistentie
     AnyDesk en TeamViewer
     communicatie met webapp
@@ -595,8 +593,9 @@ NipperSessie.exe
     lokale 10-minutenmelding
     verzoek tot verlengen
 
-Splashtop / onderhoudsluik
-    beheer en noodroute
-    buiten NipperSessie
+Splashtop
+    gewone remote toegang
+    beheer en noodtoegang
+    blijft beschikbaar
 
 ```

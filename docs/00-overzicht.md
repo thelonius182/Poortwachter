@@ -1,7 +1,7 @@
 # Poortwachter
 
 Projectnaam: **Poortwachter**
-Applicatienaam: **NipperSessie**
+Applicatienaam: **Poortwachter**
 
 ## Documentatie
 
