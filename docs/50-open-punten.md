@@ -1,3 +1,4 @@
+- Hoe moet Splashtop precies doorwerken in de pc-toestand en claimlogica?
 # Open punten
 
 - Hoe maakt `NipperSessieService` AnyDesk en TeamViewer beschikbaar en niet beschikbaar, en hoe beëindigt de service actieve verbindingen?
