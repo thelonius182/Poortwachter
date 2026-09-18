@@ -93,3 +93,28 @@ Als `state.json` ontbreekt of ongeldig is, wordt fail-closed hersteld: AnyDesk e
 **Reden**
 
 Voor één lokale toestandrecord is een JSON-bestand eenvoudiger dan registry of een database. De schrijfstrategie voorkomt in-place overschrijven van de enige geldige toestand. Fail-closed herstel voorkomt dat beschadigde persistentie remote toegang vrijgeeft.
+
+
+## 2026-09-19 — Applicatienaam en claimterminologie
+
+**Besluit**
+
+De zichtbare naam van de applicatie is **Poortwachter**.
+
+Intern heet het tijdelijke gebruiksrecht op de Nipper-pc een **claim**. In medewerkerstekst blijft daarvoor het woord **sessie** gebruikt worden.
+
+De interne opdrachten heten:
+
+- `CREATE_CLAIM`
+- `RELEASE_CLAIM`
+
+De tijdvelden heten:
+
+- `claimed_at`
+- `expires_at`
+
+De bestaande technische componentnamen `NipperSessieService`, `NipperSessie.exe`, `NipperSessie.Web` en de hostname `nippersessie.concertzender.nl` blijven voorlopig ongewijzigd.
+
+**Reden**
+
+De applicatienaam en het domeinbegrip waren beide gebaseerd op het woord sessie. Dat werd onduidelijk zodra remote sessies en de toestand van de Nipper-pc afzonderlijk moesten worden beschreven. De term claim onderscheidt het tijdelijke gebruiksrecht van een remote verbinding; medewerkerstekst kan het kortere begrip sessie blijven gebruiken.
