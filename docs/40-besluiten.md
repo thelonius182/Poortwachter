@@ -7,8 +7,8 @@
 C# / .NET voor alle onderdelen:
 
 - ASP.NET Core voor de webapp
-- .NET Windows Service voor `NipperSessieService`
-- .NET Windows-app voor `NipperSessie.exe`
+- .NET Windows Service voor `PoortwachterService`
+- .NET Windows-app voor `Poortwachter.exe`
 
 **Reden**
 
@@ -21,10 +21,10 @@ C# / .NET voor alle onderdelen:
 
 **Besluit**
 
-- `NipperSessie.Web`: .NET 10 (`net10.0`)
-- `NipperSessieService`: .NET Framework 4.8 (`net48`)
-- `NipperSessie.exe`: .NET Framework 4.8 (`net48`)
-- `NipperSessie.Contracts`: .NET Standard 2.0 (`netstandard2.0`)
+- `Poortwachter.Web`: .NET 10 (`net10.0`)
+- `PoortwachterService`: .NET Framework 4.8 (`net48`)
+- `Poortwachter.exe`: .NET Framework 4.8 (`net48`)
+- `Poortwachter.Contracts`: .NET Standard 2.0 (`netstandard2.0`)
 
 **Reden**
 
@@ -47,7 +47,7 @@ De DS918+ heeft Container Manager en Reverse Proxy beschikbaar; er is geen besta
 De webapp wordt gepubliceerd als:
 
 ```text
-https://nippersessie.concertzender.nl
+https://poortwachter.concertzender.nl
 ```
 
 Hiervoor wordt op de Synology een afzonderlijk Let's Encrypt-certificaat gebruikt, tenzij bij inrichting blijkt dat een bestaand certificaat deze hostname al dekt.
@@ -56,7 +56,7 @@ Het certificaat wordt aan de NipperSessie reverse proxy toegewezen.
 
 **Randvoorwaarde**
 
-Voor uitrol moet `nippersessie.concertzender.nl` in DNS naar het publieke adres van de Synology verwijzen.
+Voor uitrol moet `poortwachter.concertzender.nl` in DNS naar het publieke adres van de Synology verwijzen.
 
 **Reden**
 
@@ -66,9 +66,9 @@ Poort 80 en 443 worden al vanaf de Ziggo-router naar de Synology doorgestuurd. D
 
 **Besluit**
 
-`NipperSessie.exe` en `NipperSessieService` communiceren lokaal via `System.IO.Pipes`, zonder WCF.
+`Poortwachter.exe` en `PoortwachterService` communiceren lokaal via `System.IO.Pipes`, zonder WCF.
 
-`NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client.
+`PoortwachterService` is de named-pipe-server en `Poortwachter.exe` is client.
 
 **Reden**
 
@@ -78,10 +78,10 @@ De communicatie betreft twee processen op dezelfde Windows-pc en heeft een klein
 
 **Besluit**
 
-`NipperSessieService` bewaart de persistente toestand als één JSON-bestand in:
+`PoortwachterService` bewaart de persistente toestand als één JSON-bestand in:
 
 ```text
-C:\ProgramData\NipperSessie\state.json
+C:\ProgramData\Poortwachter\state.json
 ```
 
 Het formaat bevat een versienummer en alleen de gegevens die voor herstel nodig zijn. `claimed_at` en `expires_at` worden in UTC opgeslagen.
@@ -113,8 +113,36 @@ De tijdvelden heten:
 - `claimed_at`
 - `expires_at`
 
-De bestaande technische componentnamen `NipperSessieService`, `NipperSessie.exe`, `NipperSessie.Web` en de hostname `nippersessie.concertzender.nl` blijven voorlopig ongewijzigd.
+De technische componentnamen, het opslagpad en de hostname worden in een volgend besluit gelijkgetrokken met de applicatienaam.
 
 **Reden**
 
 De applicatienaam en het domeinbegrip waren beide gebaseerd op het woord sessie. Dat werd onduidelijk zodra remote sessies en de toestand van de Nipper-pc afzonderlijk moesten worden beschreven. De term claim onderscheidt het tijdelijke gebruiksrecht van een remote verbinding; medewerkerstekst kan het kortere begrip sessie blijven gebruiken.
+
+
+## 2026-09-19 — Technische namen en hostname
+
+**Besluit**
+
+De technische namen worden gelijkgetrokken met de applicatienaam:
+
+- `Poortwachter.Web`
+- `PoortwachterService`
+- `Poortwachter.exe`
+- `Poortwachter.Contracts`
+
+Het opslagpad wordt:
+
+```text
+C:\ProgramData\Poortwachter\state.json
+```
+
+De publieke hostname wordt:
+
+```text
+poortwachter.concertzender.nl
+```
+
+**Reden**
+
+De implementatie is nog niet ver genoeg gevorderd om compatibiliteitsnamen of migraties nodig te maken. Eén naam voorkomt blijvende technische verwijzingen naar de oude applicatienaam.
