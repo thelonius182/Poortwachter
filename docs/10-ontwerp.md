@@ -201,6 +201,8 @@ Er is geen maximumaantal verlengingen.
 
 Verlengen gebeurt lokaal tussen `NipperSessie.exe` en `NipperSessieService`; het is geen opdracht vanuit de webapp.
 
+De lokale communicatie gebruikt `System.IO.Pipes`. `NipperSessieService` is de named-pipe-server en `NipperSessie.exe` is client. Het lokale protocol blijft beperkt tot de gegevens en acties die nodig zijn voor de 10-minutenmelding en verlengen.
+
 ---
 
 ## 9. Herstart van de Nipper-pc
