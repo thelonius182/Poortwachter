@@ -164,3 +164,23 @@ Als een remote verbinding wordt verbroken, beëindigt `PoortwachterService` de c
 **Reden**
 
 De medewerker beëindigt het gebruik door de remote verbinding op de Nipper-pc te verbreken. De web-UI hoeft daarom geen aparte stopactie te bieden. De termijn van twee minuten voorkomt dat een aangemaakte claim de Nipper-pc langdurig blokkeert zonder dat een remote verbinding tot stand komt.
+
+
+## 2026-09-19 — Splashtop zonder claim
+
+**Besluit**
+
+De Splashtop-streamer/service blijft altijd actief en beschikbaar als onderhoudsluik.
+
+Als een Splashtop-verbinding tot stand komt terwijl er geen actieve claim is:
+- wordt geen claim aangemaakt;
+- gaat de pc naar `IN_GEBRUIK`;
+- wordt `CREATE_CLAIM` geweigerd zolang de verbinding actief is.
+
+Als de gebruiker de Splashtop-verbinding verbreekt en de detectie gedurende minimaal vijf seconden bevestigt dat er geen verbinding meer actief is, gaat de pc rechtstreeks naar `VRIJ`.
+
+Er is daarbij geen overgang via `AFSLUITEN`, omdat er geen claim is en AnyDesk en TeamViewer al niet beschikbaar zijn.
+
+**Reden**
+
+De onderhouds-/noodroute via Splashtop moet altijd bereikbaar blijven, terwijl actief gebruik van de Nipper-pc voor andere medewerkers wel als bezet zichtbaar moet zijn. Het beëindigen van een Splashtop-verbinding betekent alleen het verbreken van de remote verbinding; de streamer/service zelf blijft actief.
