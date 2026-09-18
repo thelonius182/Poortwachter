@@ -106,7 +106,6 @@ Intern heet het tijdelijke gebruiksrecht op de Nipper-pc een **claim**. In medew
 De interne opdrachten heten:
 
 - `CREATE_CLAIM`
-- `RELEASE_CLAIM`
 
 De tijdvelden heten:
 
@@ -146,3 +145,22 @@ poortwachter.concertzender.nl
 **Reden**
 
 De implementatie is nog niet ver genoeg gevorderd om compatibiliteitsnamen of migraties nodig te maken. Eén naam voorkomt blijvende technische verwijzingen naar de oude applicatienaam.
+
+
+## 2026-09-19 — Remote-app en claimlevenscyclus
+
+**Besluit**
+
+AnyDesk, TeamViewer en Splashtop worden gezamenlijk **remote-apps** genoemd.
+
+De webapp kent alleen de opdracht `CREATE_CLAIM`; er is geen `RELEASE_CLAIM`-opdracht en de medewerker-UI bevat geen knop om een sessie te stoppen.
+
+Na `CREATE_CLAIM` moet binnen twee minuten een remote verbinding via een remote-app tot stand komen. Gebeurt dat niet, dan laat `PoortwachterService` de claim vervallen en gaat de pc naar `AFSLUITEN`.
+
+Als een remote verbinding wordt verbroken, beëindigt `PoortwachterService` de claim en gaat de pc naar `AFSLUITEN`.
+
+`expires_at` blijft de uiterste eindtijd van de claim.
+
+**Reden**
+
+De medewerker beëindigt het gebruik door de remote verbinding op de Nipper-pc te verbreken. De web-UI hoeft daarom geen aparte stopactie te bieden. De termijn van twee minuten voorkomt dat een aangemaakte claim de Nipper-pc langdurig blokkeert zonder dat een remote verbinding tot stand komt.
